@@ -2,9 +2,6 @@
 
 Minimal directory structure setup utility for [hy](hylang.org/).
 
-Because manually setting up the same boilerplate file and directory structure
-makes me feel the kind of tiredness sleep won't fix.
-
 ## Install
 
 ```sh
