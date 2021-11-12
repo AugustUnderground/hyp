@@ -1,4 +1,5 @@
 (import os)
+(import errno)
 (import [argparse :as arg])
 
 (require [hy.contrib.walk [let]])
@@ -7,7 +8,7 @@
 
 (defn setup-interactive [args]
   (raise NotImplementedError)
-  -1)
+  errno.ENOSYS)
 
 (defn setup-new [args]
   (let [project-name (get args "project")
@@ -34,13 +35,14 @@
     (if (= project-language "hy")
       (with [init-file (open (.format "./{}/{}/{}.hy" project-name project-name project-name) "w+")]
         (init-file.write (.format 
-"(require [hy.contrib.walk [let]]) 
-(require [hy.contrib.loop [loop]])
-(require [hy.extra.anaphoric [*]])
-(import  [typing [List Set Dict Tuple Optional Union]])
+"(require [hy.contrib.walk      [let]]) 
+(require [hy.contrib.loop      [loop]])
+(require [hy.extra.anaphoric   [*]])
 (require [hy.contrib.sequences [defseq seq]])
 (import  [hy.contrib.sequences [Sequence end-sequence]])
-(import  [hy.contrib.pprint [pp pprint]])")))
+(import  [hy.contrib.pprint    [pp pprint]])
+(import  [typing               [Any Callable Iterator Literal Optional 
+                                Dict List Set Tuple Union]])")))
       (with [init-file (open (.format "./{}/{}/{}.py" project-name project-name project-name) "w+")]
         (init-file.write "")))
     0))
