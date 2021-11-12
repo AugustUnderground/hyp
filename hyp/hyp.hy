@@ -33,7 +33,14 @@
 
     (if (= project-language "hy")
       (with [init-file (open (.format "./{}/{}/{}.hy" project-name project-name project-name) "w+")]
-        (init-file.write (.format "(require [hy.contrib.walk [let]])\n(require [hy.contrib.loop [loop]])\n(require [hy.extra.anaphoric [*]])")))
+        (init-file.write (.format 
+"(require [hy.contrib.walk [let]]) 
+(require [hy.contrib.loop [loop]])
+(require [hy.extra.anaphoric [*]])
+(import  [typing [List Set Dict Tuple Optional Union]])
+(require [hy.contrib.sequences [defseq seq]])
+(import  [hy.contrib.sequences [Sequence end-sequence]])
+(import  [hy.contrib.pprint [pp pprint]])")))
       (with [init-file (open (.format "./{}/{}/{}.py" project-name project-name project-name) "w+")]
         (init-file.write "")))
     0))
@@ -191,8 +198,7 @@ f"
    2. Grant of Copyright License. Subject to the terms and conditions of
       this License, each Contributor hereby grants to You a perpetual,
       worldwide, non-exclusive, no-charge, royalty-free, irrevocable
-      copyright license to reproduce, prepare Derivative Works of,
-      publicly display, publicly perform, sublicense, and distribute the
+      copyright license to reproduce, prepare Derivative Works of, publicly display, publicly perform, sublicense, and distribute the
       Work and such Derivative Works in Source or Object form.
 
    3. Grant of Patent License. Subject to the terms and conditions of
