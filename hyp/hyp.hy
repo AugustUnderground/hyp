@@ -30,11 +30,20 @@
       (main-file.write (.format "def main():\n    return 0\n\nif __name__ == '__main__':\n    sys.exit(main())")))
 
     (with [init-file (open (.format "./{}/{}/__init__.py" project-name project-name) "w+")]
-      (init-file.write (.format "{}from .{} import *" (if (= project-language "hy") "import hy\n" "") project-name)))
+      (init-file.write (.format "{}from .{} import *" 
+                                (cond [(= project-language "hy") 
+                                       "import hy\n"]
+                                      [(= project-language "coconut") 
+                                       "import coconut\n"]
+                                      [True "" ]) 
+                                project-name)))
 
-    (if (= project-language "hy")
-      (with [init-file (open (.format "./{}/{}/{}.hy" project-name project-name project-name) "w+")]
-        (init-file.write (.format 
+    (cond [(= project-language "hy")
+           (with [init-file (open (.format "./{}/{}/{}.hy" project-name 
+                                                           project-name 
+                                                           project-name) 
+                                           "w+")]
+              (init-file.write (.format 
 "(require [hy.contrib.walk      [let]]) 
 (require [hy.contrib.loop      [loop]])
 (require [hy.extra.anaphoric   [*]])
@@ -42,9 +51,20 @@
 (import  [hy.contrib.sequences [Sequence end-sequence]])
 (import  [hy.contrib.pprint    [pp pprint]])
 (import  [typing               [Any Callable Iterator Literal Optional 
-                                Dict List Set Tuple Union]])")))
-      (with [init-file (open (.format "./{}/{}/{}.py" project-name project-name project-name) "w+")]
-        (init-file.write "")))
+                                Dict List Set Tuple Union]])")))]
+
+          [(= project-language "coconut")
+           (with [init-file (open (.format "./{}/{}/{}.coco" project-name 
+                                                             project-name 
+                                                             project-name) 
+                                  "w+")]
+              (init-file.write ""))]
+          [True (with [init-file (open (.format "./{}/{}/{}.py" 
+                                                project-name 
+                                                project-name 
+                                                project-name) 
+                                       "w+")]
+                  (init-file.write ""))])
     0))
 
 (defn cli []
@@ -53,8 +73,8 @@
                                :help f"Supported modes are: new, interactive")
         _ (parser.add-argument "project" :type str :default None
                                :help f"Name of the new project.")
-        _ (parser.add-argument "--lang" :choices ["hy" "py"] :default "hy"
-                               :help f"Supported languages are: hy (default), py")
+        _ (parser.add-argument "--lang" :choices ["hy" "coconut" "py"] :default "hy"
+                               :help f"Supported languages are: hy (default), coconut, py")
         _ (parser.add-argument "--lic" :choices ["MIT" "BSD2" "BSD3" "GPL2" "GPL3" "Apache"] :default "MIT"
                                :help f"Supported Licenses are: MIT, BSD2, BSD3, GPL2, GPL3, Apache")
         args (parser.parse-args)]
@@ -91,7 +111,7 @@ setuptools.setup( name                          = package_name
                 , python_requires               = '>=3.8'
                 , install_requires              = requirements
                 , entry_points                  = {{ 'console_scripts': [ 'FIXME' ]}}
-                , package_data                  = {{ '': ['*.hy', '__pycache__/*']}}
+                , package_data                  = {{ '': ['*.hy', '*.coco', '__pycache__/*']}}
                 , )
 " project-name))
 
@@ -1438,6 +1458,28 @@ wheels/
 {project-name}/__pycache__/
 {project-name}/*.py[cod]
 {project-name}/*.hy[cod]
+{project-name}/*$py.class" ]
+        [(= lang "coconut")
+f"
+.installed.cfg
+*.py[cod]
+*$py.class
+*.so
+*.egg-info
+*.egg-info/
+*.egg
+.eggs/
+.Python
+__pycache__/
+build/
+develop-eggs/
+dist/
+eggs/
+share/python-wheels/
+wheels/
+
+{project-name}/__pycache__/
+{project-name}/*.py[cod]
 {project-name}/*$py.class" ]
         [(= lang "py")
 f"
