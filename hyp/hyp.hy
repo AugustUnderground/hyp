@@ -20,7 +20,7 @@
     (with [readme-file (open (.format "./{}/README.md" project-name) "w+")]
       (readme-file.write (.format "# {}" project-name)))
     (with [setup-file (open (.format "./{}/setup.py" project-name) "w+")]
-      (setup-file.write (setup-py project-name)))
+      (setup-file.write (setup-py project-name project-language)))
     (with [dependencies-file (open (.format "./{}/requirements.txt" project-name) "w+")]
       (dependencies-file.write "")) 
     (with [dependencies-file (open (.format "./{}/.gitignore" project-name) "w+")]
@@ -33,8 +33,7 @@
       (init-file.write (.format "{}from .{} import *" 
                                 (cond [(= project-language "hy") 
                                        "import hy\n"]
-                                      [(= project-language "coconut") 
-                                       "import coconut\n"]
+                                      [(= project-language "coconut") ""]
                                       [True "" ]) 
                                 project-name)))
 
@@ -84,10 +83,10 @@
            (setup-interactive (vars args))]
           [True -1])))
 
-(defn setup-py [project-name]
+(defn setup-py [project-name project-language]
 (.format
-"import setuptools
- 
+"{}from setuptools import setup, find_packages
+
 package_name = '{}'
 
 with open('README.md', 'r') as fh:
@@ -95,25 +94,44 @@ with open('README.md', 'r') as fh:
 
 with open('requirements.txt', 'r') as req:
     requirements = req.read().splitlines()
- 
-setuptools.setup( name                          = package_name
-                , version                       = '0.0.1'
-                , author                        = 'FIXME'
-                , author_email                  = 'FIXME'
-                , description                   = 'FIXME'
-                , long_description              = long_description
-                , long_description_content_type = 'text/markdown'
-                , url                           = 'FIXME'
-                , packages                      = setuptools.find_packages()
-                , classifiers                   = [ 'Development Status :: 2 :: Pre-Alpha'
-                                                  , 'Programming Language :: Python :: 3'
-                                                  , 'Operating System :: POSIX :: Linux' ]
-                , python_requires               = '>=3.8'
-                , install_requires              = requirements
-                , entry_points                  = {{ 'console_scripts': [ 'FIXME' ]}}
-                , package_data                  = {{ '': ['*.hy', '*.coco', '__pycache__/*']}}
-                , )
-" project-name))
+{}
+setup( name                          = package_name
+     , version                       = '0.0.1'
+     , author                        = 'FIXME'
+     , author_email                  = 'FIXME'
+     , description                   = 'FIXME'
+     , long_description              = long_description
+     , long_description_content_type = 'text/markdown'
+     , url                           = 'FIXME'
+     , packages                      = find_packages()
+     , classifiers                   = [ 'Development Status :: 2 :: Pre-Alpha'
+                                       , 'Programming Language :: Python :: 3'
+                                       , 'Operating System :: POSIX :: Linux' ]
+     , python_requires               = '>=3.8'
+     , install_requires              = requirements
+     , entry_points                  = {{ 'console_scripts': [ 'FIXME' ]}}
+     , package_data                  = {{ '': ['*.hy', '*.coco', '__pycache__/*']}}
+{}
+" 
+  (if (= project-language "coconut") 
+f"import glob, os
+from setuptools.command.build_py import build_py
+" f"")
+  project-name
+  (if (= project-language "coconut")
+f"
+class InstallHook(build_py):
+    def run(self):
+        coco_files = glob.glob('**/*.coco', recursive = True)
+        for coco in coco_files:
+            os.system(f'coconut {{coco}}')
+        build_py.run(self)
+" 
+f"")
+  (if (= project-language "coconut")
+f"     , cmdclass                      = {{ 'build_py': InstallHook }} 
+     , )" 
+f"     , )")))
 
 (defn _MIT_NOTICE []
 f"""
