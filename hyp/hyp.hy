@@ -122,9 +122,7 @@ from setuptools.command.build_py import build_py
 f"
 class InstallHook(build_py):
     def run(self):
-        coco_files = glob.glob('**/*.coco', recursive = True)
-        for coco in coco_files:
-            os.system(f'coconut {{coco}}')
+        os.system(f'coconut ./{{package_name}}')
         build_py.run(self)
 " 
 f"")
